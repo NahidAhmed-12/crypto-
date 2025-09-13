@@ -1,1 +1,132 @@
 @tailwind base; @tailwind components; @tailwind utilities;
+/* আপনার অন্যান্য Tailwind ডিরেক্টিভের পরে এটি যোগ করুন */
+
+:root { --glow-color: rgba(88, 166, 255, 0.75); }
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #010409;
+    color: #e6edf3;
+    overflow-x: hidden;
+}
+
+.body-no-scroll {
+    overflow: hidden;
+}
+
+/* --- NEW Animated Mesh Gradient Background --- */
+.animated-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+}
+
+.blob {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1), transparent 70%);
+    filter: blur(100px);
+    mix-blend-mode: screen;
+}
+
+.blob1 {
+    width: 400px;
+    height: 400px;
+    top: 10%;
+    left: 10%;
+    background-color: var(--glow-color);
+    animation: moveBlob1 25s infinite alternate;
+}
+
+.blob2 {
+    width: 500px;
+    height: 500px;
+    top: 60%;
+    left: 70%;
+    background-color: #7a00ff;
+    animation: moveBlob2 30s infinite alternate;
+}
+
+.blob3 {
+    width: 300px;
+    height: 300px;
+    top: 40%;
+    left: 40%;
+    background-color: #ff007a;
+    animation: moveBlob3 20s infinite alternate;
+}
+
+@keyframes moveBlob1 {
+    from { transform: translate(-20%, 20%) rotate(-45deg); }
+    to { transform: translate(20%, -20%) rotate(45deg); }
+}
+
+@keyframes moveBlob2 {
+    from { transform: translate(10%, -10%) rotate(60deg); }
+    to { transform: translate(-10%, 10%) rotate(-60deg); }
+}
+
+@keyframes moveBlob3 {
+    from { transform: translate(0%, 0%) rotate(0deg); }
+    to { transform: translate(15%, 15%) rotate(90deg); }
+}
+
+.crypto-card {
+    background: rgba(13, 17, 23, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 1rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+    opacity: 0;
+    transform: translateY(30px);
+}
+
+.crypto-card.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.crypto-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 30px rgba(0, 0, 0, 0.3);
+}
+
+.crypto-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 50%;
+    height: 100%;
+    transform: translateX(-200%) skewX(-25deg);
+    background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.1) 50%, rgba(255, 255, 255, 0) 100%);
+    animation: autoShine 6s ease-in-out infinite;
+}
+
+@keyframes autoShine {
+    0% { transform: translateX(-200%) skewX(-25deg); }
+    40% { transform: translateX(300%) skewX(-25deg); }
+    100% { transform: translateX(300%) skewX(-25deg); }
+}
+
+#details-view {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    background-color: #010409;
+    overflow-y: auto;
+    transform: translateY(100%);
+    transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+#details-view.is-active {
+    transform: translateY(0%);
+}
