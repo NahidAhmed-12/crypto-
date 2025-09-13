@@ -22,11 +22,9 @@ export default async function handler(request) {
     let fetchUrl;
 
     if (coinId) {
-      // নির্দিষ্ট কয়েনের চার্ট ডেটার জন্য URL
       fetchUrl = `${API_BASE_URL}/coins/${coinId}/market_chart?vs_currency=usd&days=1`;
     } else {
-      // সকল মার্কেটের ডেটার জন্য URL
-      // *** ভুলটি এখানে ছিল এবং এটি সংশোধন করা হয়েছে ***
+      // নিশ্চিত করুন যে এই লাইনে API_BASE_URL ব্যবহৃত হয়েছে
       fetchUrl = `${API_BASE_URL}/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false`;
     }
 
