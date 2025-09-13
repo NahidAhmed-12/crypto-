@@ -1,41 +1,60 @@
-// Vercel এই ফাইলটিকে স্বয়ংক্রিয়ভাবে একটি সার্ভারলেস ফাংশনে পরিণত করবে।
-// এই ফাংশনটি /api/crypto রুটে উপলব্ধ হবে।
+import { URL } from 'url';
 
-export default async function handler(request, response) {
-  // এনভায়রনমেন্ট ভেরিয়েবল থেকে বেস URL পড়া হচ্ছে
+export const config = {
+  runtime: 'edge',
+};
+
+export default async function handler(request) {
   const API_BASE_URL = process.env.COINGECKO_API_BASE_URL;
 
   if (!API_BASE_URL) {
-    return response.status(500).json({ error: 'API base URL is not configured.' });
-  }
-
-  // রিকোয়েস্টের URL থেকে কোয়েরি প্যারামিটার বের করা
-  const { searchParams } = new URL(request.url, `http://${request.headers.host}`);
-  const coinId = searchParams.get('coinId');
-
-  let fetchUrl;
-
-  if (coinId) {
-    // যদি coinId থাকে, তবে চার্টের ডেটা ফেচ করা হবে
-    fetchUrl = `${API_BASE_URL}/coins/${coinId}/market_chart?vs_currency=usd&days=1`;
-  } else {
-    // অন্যথায়, সকল মার্কেটের ডেটা ফেচ করা হবে
-    fetchUrl = `${API__URL}/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false`;
+    console.error("COINGECKO_API_BASE_URL is not defined in environment variables.");
+    return new Response(
+      JSON.stringify({ error: 'API configuration error. The base URL is not set on the server.' }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    );
   }
 
   try {
-    const apiResponse = await fetch(fetchUrl);
-    if (!apiResponse.ok) {
-      // API থেকে কোনো এরর আসলে সেটি ক্লায়েন্টকে পাঠানো হবে
-      throw new Error(`Error from CoinGecko API: ${apiResponse.statusText}`);
-    }
-    const data = await apiResponse.json();
+    const { searchParams } = new URL(request.url);
+    const coinId = searchParams.get('coinId');
     
-    // সফলভাবে ডেটা ক্লায়েন্টকে পাঠানো হচ্ছে
-    return response.status(200).json(data);
+    let fetchUrl;
+
+    if (coinId) {
+      // নির্দিষ্ট কয়েনের চার্ট ডেটার জন্য URL
+      fetchUrl = `${API_BASE_URL}/coins/${coinId}/market_chart?vs_currency=usd&days=1`;
+    } else {
+      // সকল মার্কেটের ডেটার জন্য URL
+      // *** ভুলটি এখানে ছিল এবং এটি সংশোধন করা হয়েছে ***
+      fetchUrl = `${API_BASE_URL}/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false`;
+    }
+
+    const apiResponse = await fetch(fetchUrl);
+
+    if (!apiResponse.ok) {
+      console.error(`CoinGecko API Error: ${apiResponse.status} ${apiResponse.statusText}`);
+      return new Response(
+        JSON.stringify({ error: `Failed to fetch data from CoinGecko API. Status: ${apiResponse.status}` }),
+        { status: apiResponse.status, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const data = await apiResponse.json();
+
+    return new Response(JSON.stringify(data), {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 's-maxage=60, stale-while-revalidate=30',
+      },
+    });
 
   } catch (error) {
-    console.error('API route error:', error);
-    return response.status(500).json({ error: 'Failed to fetch data from the external API.' });
+    console.error('Serverless function crashed:', error);
+    return new Response(
+      JSON.stringify({ error: 'An unexpected error occurred on the server.' }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    );
   }
 }
