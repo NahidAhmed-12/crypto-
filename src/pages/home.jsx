@@ -26,7 +26,6 @@ ChartJS.register(
 
 // Crypto Card Component (কোনো পরিবর্তন প্রয়োজন নেই)
 const CryptoCard = ({ coin, index }) => {
-    // ... আগের কোড এখানে থাকবে ...
     const cardRef = useRef(null);
     const navigate = useNavigate();
 
@@ -49,6 +48,7 @@ const CryptoCard = ({ coin, index }) => {
 
         return () => {
             if (cardRef.current) {
+                // eslint-disable-next-line react-hooks/exhaustive-deps
                 observer.unobserve(cardRef.current);
             }
         };
@@ -88,7 +88,7 @@ const CryptoCard = ({ coin, index }) => {
     );
 };
 
-// Details View Component (আপডেটেড)
+// Details View Component (FIXED)
 const DetailsView = ({ coinId, allCoins, onClose }) => {
     const [chartData, setChartData] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -106,13 +106,20 @@ const DetailsView = ({ coinId, allCoins, onClose }) => {
             if (!coinId) return;
             setIsLoading(true);
             try {
-                // *** পরিবর্তন এখানে: এখন আমাদের নিজস্ব API কে কল করা হচ্ছে ***
                 const res = await fetch(`/api/crypto?coinId=${coinId}`);
                 if (!res.ok) throw new Error('Network error');
                 const data = await res.json();
-                setChartData(data); // সরাসরি data সেট করা হচ্ছে কারণ API থেকে এখন শুধু prices অ্যারে আসছে
+                // *** মূল পরিবর্তন এখানে ***
+                // API থেকে আসা অবজেক্টের ভেতর থেকে 'prices' অ্যারে-কে সেট করা হচ্ছে
+                if (data && Array.isArray(data.prices)) {
+                    setChartData(data.prices);
+                } else {
+                    // যদি prices অ্যারে না পাওয়া যায়, তবে একটি খালি অ্যারে সেট করা হবে
+                    setChartData([]);
+                }
             } catch (error) {
                 console.error("Failed to fetch chart data:", error);
+                setChartData([]); // এরর হলেও খালি অ্যারে সেট করা হবে
             } finally {
                 setIsLoading(false);
             }
@@ -121,7 +128,6 @@ const DetailsView = ({ coinId, allCoins, onClose }) => {
         fetchChartData();
     }, [coinId]);
 
-    // ... বাকি DetailsView কম্পোনেন্টের কোড অপরিবর্তিত থাকবে ...
     if (!selectedCoin) {
         return (
             <div id="details-view" className="is-active">
@@ -135,10 +141,11 @@ const DetailsView = ({ coinId, allCoins, onClose }) => {
     const isPositive = selectedCoin.price_change_percentage_24h >= 0;
 
     const lineChartData = {
-        labels: chartData.map(p => new Date(p[0]).toLocaleTimeString()),
+        // নিশ্চিত করা হচ্ছে যে chartData একটি অ্যারে
+        labels: Array.isArray(chartData) ? chartData.map(p => new Date(p[0]).toLocaleTimeString()) : [],
         datasets: [{
             label: 'Price (USD)',
-            data: chartData.map(p => p[1]),
+            data: Array.isArray(chartData) ? chartData.map(p => p[1]) : [],
             borderColor: isPositive ? '#10B981' : '#EF4444',
             backgroundColor: (context) => {
                 const ctx = context.chart.ctx;
@@ -212,7 +219,7 @@ const DetailsView = ({ coinId, allCoins, onClose }) => {
     );
 };
 
-// Home Component (Main Page) (আপডেটেড)
+// Home Component (Main Page) (কোনো পরিবর্তন প্রয়োজন নেই)
 const Home = () => {
     const [allCoins, setAllCoins] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
@@ -226,7 +233,6 @@ const Home = () => {
                 setIsLoading(true);
             }
             try {
-                // *** পরিবর্তন এখানে: এখন আমাদের নিজস্ব API কে কল করা হচ্ছে ***
                 const res = await fetch('/api/crypto');
                 if (!res.ok) throw new Error('Network error');
                 const data = await res.json();
@@ -243,9 +249,9 @@ const Home = () => {
         fetchCryptoData();
         const interval = setInterval(fetchCryptoData, 60000);
         return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
     
-    // ... বাকি Home কম্পোনেন্টের কোড অপরিবর্তিত থাকবে ...
     const filteredCoins = useMemo(() => {
         return allCoins.filter(c =>
             c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
