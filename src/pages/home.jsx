@@ -24,70 +24,71 @@ ChartJS.register(
   Filler
 );
 
-// Crypto Card Component
+// Crypto Card Component (কোনো পরিবর্তন প্রয়োজন নেই)
 const CryptoCard = ({ coin, index }) => {
-  const cardRef = useRef(null);
-  const navigate = useNavigate();
+    // ... আগের কোড এখানে থাকবে ...
+    const cardRef = useRef(null);
+    const navigate = useNavigate();
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('is-visible');
-            observer.unobserve(entry.target);
-          }
-        });
-      },
-      { threshold: 0.1 }
-    );
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            },
+            { threshold: 0.1 }
+        );
 
-    if (cardRef.current) {
-      observer.observe(cardRef.current);
-    }
+        if (cardRef.current) {
+            observer.observe(cardRef.current);
+        }
 
-    return () => {
-      if (cardRef.current) {
-        observer.unobserve(cardRef.current);
-      }
-    };
-  }, []);
+        return () => {
+            if (cardRef.current) {
+                observer.unobserve(cardRef.current);
+            }
+        };
+    }, []);
     
-  const priceChange = coin.price_change_percentage_24h;
-  const isPositive = priceChange >= 0;
+    const priceChange = coin.price_change_percentage_24h;
+    const isPositive = priceChange >= 0;
 
-  const handleCardClick = () => {
-    navigate(`/${coin.id}`);
-  };
+    const handleCardClick = () => {
+        navigate(`/${coin.id}`);
+    };
 
-  return (
-    <div
-      ref={cardRef}
-      className="crypto-card p-6"
-      style={{ animationDelay: `${Math.random() * 5}s` }}
-      onClick={handleCardClick}
-    >
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          <img className="h-10 w-10 rounded-full" src={coin.image} alt={coin.name} />
-          <div>
-            <p className="text-lg font-bold text-white">{coin.name}</p>
-            <p className="text-sm text-gray-400">{coin.symbol.toUpperCase()}</p>
-          </div>
+    return (
+        <div
+        ref={cardRef}
+        className="crypto-card p-6"
+        style={{ animationDelay: `${Math.random() * 5}s` }}
+        onClick={handleCardClick}
+        >
+        <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+            <img className="h-10 w-10 rounded-full" src={coin.image} alt={coin.name} />
+            <div>
+                <p className="text-lg font-bold text-white">{coin.name}</p>
+                <p className="text-sm text-gray-400">{coin.symbol.toUpperCase()}</p>
+            </div>
+            </div>
+            <p className="text-xs text-gray-500 font-mono">#{coin.market_cap_rank}</p>
         </div>
-        <p className="text-xs text-gray-500 font-mono">#{coin.market_cap_rank}</p>
-      </div>
-      <div className="mt-4 flex justify-between items-end">
-        <p className="text-3xl font-semibold text-white">${coin.current_price.toLocaleString()}</p>
-        <p className={`text-lg font-semibold ${isPositive ? 'text-green-400' : 'text-red-400'}`}>
-          {isPositive ? '▲' : '▼'} {Math.abs(priceChange).toFixed(2)}%
-        </p>
-      </div>
-    </div>
-  );
+        <div className="mt-4 flex justify-between items-end">
+            <p className="text-3xl font-semibold text-white">${coin.current_price.toLocaleString()}</p>
+            <p className={`text-lg font-semibold ${isPositive ? 'text-green-400' : 'text-red-400'}`}>
+            {isPositive ? '▲' : '▼'} {Math.abs(priceChange).toFixed(2)}%
+            </p>
+        </div>
+        </div>
+    );
 };
 
-// Details View Component
+// Details View Component (আপডেটেড)
 const DetailsView = ({ coinId, allCoins, onClose }) => {
     const [chartData, setChartData] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -105,10 +106,11 @@ const DetailsView = ({ coinId, allCoins, onClose }) => {
             if (!coinId) return;
             setIsLoading(true);
             try {
-                const res = await fetch(`https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=usd&days=1`);
+                // *** পরিবর্তন এখানে: এখন আমাদের নিজস্ব API কে কল করা হচ্ছে ***
+                const res = await fetch(`/api/crypto?coinId=${coinId}`);
                 if (!res.ok) throw new Error('Network error');
                 const data = await res.json();
-                setChartData(data.prices);
+                setChartData(data); // সরাসরি data সেট করা হচ্ছে কারণ API থেকে এখন শুধু prices অ্যারে আসছে
             } catch (error) {
                 console.error("Failed to fetch chart data:", error);
             } finally {
@@ -118,7 +120,8 @@ const DetailsView = ({ coinId, allCoins, onClose }) => {
 
         fetchChartData();
     }, [coinId]);
-    
+
+    // ... বাকি DetailsView কম্পোনেন্টের কোড অপরিবর্তিত থাকবে ...
     if (!selectedCoin) {
         return (
             <div id="details-view" className="is-active">
@@ -209,8 +212,7 @@ const DetailsView = ({ coinId, allCoins, onClose }) => {
     );
 };
 
-
-// Home Component (Main Page)
+// Home Component (Main Page) (আপডেটেড)
 const Home = () => {
     const [allCoins, setAllCoins] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
@@ -220,12 +222,12 @@ const Home = () => {
 
     useEffect(() => {
         const fetchCryptoData = async () => {
-            // শুধুমাত্র প্রথমবার লোড হওয়ার সময় প্রধান লোডার দেখাবে
             if (allCoins.length === 0) {
                 setIsLoading(true);
             }
             try {
-                const res = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false');
+                // *** পরিবর্তন এখানে: এখন আমাদের নিজস্ব API কে কল করা হচ্ছে ***
+                const res = await fetch('/api/crypto');
                 if (!res.ok) throw new Error('Network error');
                 const data = await res.json();
                 setAllCoins(data);
@@ -238,11 +240,12 @@ const Home = () => {
             }
         };
 
-        fetchCryptoData(); // প্রথমে একবার ডেটা লোড করবে
-        const interval = setInterval(fetchCryptoData, 60000); // প্রতি ৬০ সেকেন্ড পর পর ডেটা রিফ্রেশ করবে
-        return () => clearInterval(interval); // কম্পোনেন্ট আনমাউন্ট হলে ইন্টারভাল ক্লিয়ার করবে
+        fetchCryptoData();
+        const interval = setInterval(fetchCryptoData, 60000);
+        return () => clearInterval(interval);
     }, []);
     
+    // ... বাকি Home কম্পোনেন্টের কোড অপরিবর্তিত থাকবে ...
     const filteredCoins = useMemo(() => {
         return allCoins.filter(c =>
             c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
