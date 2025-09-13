@@ -1,20 +1,63 @@
+import { URL } from 'url';
+
 export const config = {
   runtime: 'edge',
 };
 
 export default async function handler(request) {
-  // এই কোডটি শুধু একটি পরীক্ষামূলক বার্তা পাঠাবে
-  // যদি এটি কাজ করে, তার মানে আপনার ডিপ্লয়মেন্ট সফল হয়েছে
-  const testResponse = {
-    status: "Test Successful!",
-    message: "Your latest code has been deployed correctly.",
-    timestamp: new Date().toISOString(),
-  };
+  const API_BASE_URL = process.env.COINGECKO_API_BASE_URL;
 
-  return new Response(JSON.stringify(testResponse), {
-    status: 200,
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
+  if (!API_BASE_URL) {
+    console.error("COINGECKO_API_BASE_URL is not defined in environment variables.");
+    return new Response(
+      JSON.stringify({ error: 'API configuration error. The base URL is not set on the server.' }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    );
+  }
+
+  try {
+    const { searchParams } = new URL(request.url);
+    const coinId = searchParams.get('coinId');
+    
+    let fetchUrl;
+
+    if (coinId) {
+      // নির্দিষ্ট কয়েনের চার্ট ডেটার জন্য URL
+      fetchUrl = `${API_BASE_URL}/coins/${coinId}/market_chart?vs_currency=usd&days=1`;
+    } else {
+      // সকল মার্কেটের ডেটার জন্য URL
+      fetchUrl = `${API_BASE_URL}/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false`;
+    }
+
+    // এক্সটার্নাল API থেকে ডেটা আনা হচ্ছে
+    const apiResponse = await fetch(fetchUrl);
+
+    // যদি API থেকে সফল প্রতিক্রিয়া না আসে
+    if (!apiResponse.ok) {
+      console.error(`CoinGecko API Error: ${apiResponse.status} ${apiResponse.statusText}`);
+      return new Response(
+        JSON.stringify({ error: `Failed to fetch data from CoinGecko API. Status: ${apiResponse.status}` }),
+        { status: apiResponse.status, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const data = await apiResponse.json();
+
+    // সফলভাবে ডেটা ক্লায়েন্টকে পাঠানো হচ্ছে
+    return new Response(JSON.stringify(data), {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        // ক্যাশিং যোগ করা হলো যাতে বার বার একই রিকোয়েস্ট না আসে
+        'Cache-Control': 's-maxage=60, stale-while-revalidate=30',
+      },
+    });
+
+  } catch (error) {
+    console.error('Serverless function crashed:', error);
+    return new Response(
+      JSON.stringify({ error: 'An unexpected error occurred on the server.' }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    );
+  }
 }
