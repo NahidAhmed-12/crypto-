@@ -1,17 +1,43 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import Home from './pages/home';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+
+// কম্পোনেন্ট ইম্পোর্ট
+import Navbar from './pages/Navbar';
+import Hero from './pages/Hero';
+import Main from './pages/Main';         // কয়েন গ্রিড
+import MarketStats from './pages/MarketStats'; // স্ট্যাটাস
+import Features from './pages/Features'; // ফিচারস
+import HowItWorks from './pages/HowItWorks'; 
+import Testimonials from './pages/Testimonials';
+import Footer from './pages/Footer';     // ফুটার
+
+
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        {/* URL এ coinId থাকলেও Home কম্পোনেন্ট রেন্ডার হবে */}
-        <Route path="/:coinId" element={<Home />} />
-        {/* মূল পাথের জন্যও Home কম্পোনেন্ট রেন্ডার হবে */}
-        <Route path="/" element={<Home />} />
-      </Routes>
-    </BrowserRouter>
+    <Router>
+      <div className="min-h-screen bg-[#0f172a] font-sans selection:bg-blue-500 selection:text-white flex flex-col">
+        
+        {/* উপরের ফিক্সড অংশ */}
+        <Navbar />
+        <Hero />
+        
+        {/* ডাইনামিক অংশ (কয়েন সার্চ ও গ্রিড) */}
+        {/* রুট সেটআপ: হোম এবং কয়েন ডিটেইলস দুটোই Main কম্পোনেন্ট দেখাবে */}
+        <Routes>
+            <Route path="/" element={<Main />} />
+            <Route path="/:coinId" element={<Main />} />
+        </Routes>
+
+        {/* নিচের স্ট্যাটিক অংশ (সব পেজে থাকবে) */}
+        <MarketStats />
+        <Features />
+        <HowItWorks />
+        <Testimonials />
+        <Footer />
+        
+      </div>
+    </Router>
   );
 }
 
