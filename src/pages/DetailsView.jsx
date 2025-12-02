@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import ReactDOM from 'react-dom'; // ১. এটা ইম্পোর্ট করা হয়েছে
 import { Line } from 'react-chartjs-2';
 import { FaTimes, FaGlobe, FaTwitter } from 'react-icons/fa';
 import {
@@ -7,20 +8,24 @@ import {
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
 
-// এখানে ডিফল্ট ভ্যালু (allCoins = []) যোগ করা হয়েছে
 const DetailsView = ({ coinId, allCoins = [], onClose }) => {
     const [chartData, setChartData] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [mounted, setMounted] = useState(false);
 
-    // সেফটি চেক যোগ করা হয়েছে
     const selectedCoin = useMemo(() => {
         if (!allCoins || !Array.isArray(allCoins)) return null;
         return allCoins.find(c => c.id === coinId);
     }, [allCoins, coinId]);
 
     useEffect(() => {
-        document.body.classList.add('body-no-scroll');
-        return () => document.body.classList.remove('body-no-scroll');
+        setMounted(true);
+        // বডি স্ক্রল লক
+        document.body.style.overflow = 'hidden';
+        return () => {
+            document.body.style.overflow = 'unset';
+            setMounted(false);
+        };
     }, []);
 
     useEffect(() => {
@@ -49,8 +54,7 @@ const DetailsView = ({ coinId, allCoins = [], onClose }) => {
         fetchChartData();
     }, [coinId]);
 
-    // যদি Coin খুঁজে না পাওয়া যায়, কিছুই রেন্ডার করবে না
-    if (!selectedCoin) return null;
+    if (!selectedCoin || !mounted) return null;
     
     const isPositive = selectedCoin.price_change_percentage_24h >= 0;
 
@@ -78,88 +82,87 @@ const DetailsView = ({ coinId, allCoins = [], onClose }) => {
     const chartOptions = {
         responsive: true,
         maintainAspectRatio: false,
-        plugins: {
-            legend: { display: false },
-            tooltip: {
-                mode: 'index',
-                intersect: false,
-                backgroundColor: 'rgba(15, 23, 42, 0.9)',
-                titleColor: '#fff',
-                bodyColor: '#cbd5e1',
-                borderColor: 'rgba(255,255,255,0.1)',
-                borderWidth: 1,
-            }
-        },
+        plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } },
         scales: {
             x: { display: false },
-            y: { 
-                display: true,
-                grid: { color: 'rgba(255,255,255,0.05)' },
-                ticks: { color: '#64748b' }
-            }
+            y: { display: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b', font: { size: 10 } } }
         },
         interaction: { intersect: false, mode: 'index' },
     };
 
-    return (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="bg-[#0f172a] w-full max-w-5xl rounded-2xl border border-gray-800 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+    // ২. মেইন কন্টেন্ট আলাদা ভেরিয়েবল-এ রাখা হলো
+    const modalContent = (
+        <div className="fixed inset-0 z-[99999] flex items-end md:items-center justify-center sm:px-4 sm:py-6 animate-in fade-in duration-200">
+            
+            {/* Backdrop: ক্লিক করলে বন্ধ হবে */}
+            <div 
+                className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+                onClick={onClose}
+            ></div>
+
+            {/* Modal Container */}
+            {/* FIX: 'mb-0' এবং 'rounded-b-none' দিয়ে নিচে আটকানো হয়েছে মোবাইলে, যাতে উপরে না উঠে যায় */}
+            {/* FIX: 'mt-20' বা 'max-h-[80vh]' ব্যবহার করা হয়েছে সেফটির জন্য */}
+            <div className="relative w-full max-w-5xl bg-[#0f172a] border-t border-x md:border border-gray-800 shadow-2xl flex flex-col 
+                            rounded-t-2xl md:rounded-2xl overflow-hidden
+                            h-[85vh] md:h-auto md:max-h-[90vh] 
+                            z-[100000]"> 
                 
-                <div className="p-6 border-b border-gray-800 flex justify-between items-center bg-[#1e293b]/50">
-                    <div className="flex items-center space-x-4">
-                        <img src={selectedCoin.image} className="h-12 w-12 rounded-full" alt="Coin" />
+                {/* Header Section */}
+                <div className="p-4 border-b border-gray-800 flex justify-between items-center bg-[#1e293b] shrink-0">
+                    <div className="flex items-center space-x-3">
+                        <img src={selectedCoin.image} className="h-10 w-10 rounded-full" alt="Coin" />
                         <div>
-                            <h2 className="text-2xl font-bold text-white">{selectedCoin.name}</h2>
-                            <p className="text-blue-400 font-mono">{selectedCoin.symbol.toUpperCase()}</p>
+                            <h2 className="text-xl font-bold text-white">{selectedCoin.name}</h2>
+                            <p className="text-blue-400 font-mono text-xs">{selectedCoin.symbol.toUpperCase()}</p>
                         </div>
                     </div>
-                    <button onClick={onClose} className="p-2 hover:bg-gray-700 rounded-full transition text-gray-400 hover:text-white">
-                        <FaTimes size={24} />
+                    <button onClick={onClose} className="p-2 bg-gray-700/50 hover:bg-gray-700 rounded-full text-gray-300">
+                        <FaTimes size={20} />
                     </button>
                 </div>
 
-                <div className="overflow-y-auto p-6 custom-scrollbar">
+                {/* Content Section */}
+                <div className="overflow-y-auto p-4 custom-scrollbar flex-1 pb-10 md:pb-4">
                     {isLoading ? (
-                        <div className="h-64 flex items-center justify-center text-gray-400">Loading chart data...</div>
+                        <div className="h-64 flex flex-col items-center justify-center text-gray-400">Loading...</div>
                     ) : (
-                        <>
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                                <div className="p-4 bg-gray-800/50 rounded-xl border border-gray-700/50">
-                                    <p className="text-gray-400 text-xs uppercase mb-1">Current Price</p>
-                                    <p className="text-xl font-bold text-white">${selectedCoin.current_price?.toLocaleString()}</p>
-                                </div>
-                                <div className="p-4 bg-gray-800/50 rounded-xl border border-gray-700/50">
-                                    <p className="text-gray-400 text-xs uppercase mb-1">Market Cap</p>
-                                    <p className="text-xl font-bold text-white">${selectedCoin.market_cap?.toLocaleString()}</p>
-                                </div>
-                                <div className="p-4 bg-gray-800/50 rounded-xl border border-gray-700/50">
-                                    <p className="text-gray-400 text-xs uppercase mb-1">24h Volume</p>
-                                    <p className="text-xl font-bold text-white">${selectedCoin.total_volume?.toLocaleString()}</p>
-                                </div>
-                                <div className="p-4 bg-gray-800/50 rounded-xl border border-gray-700/50">
-                                    <p className="text-gray-400 text-xs uppercase mb-1">All Time High</p>
-                                    <p className="text-xl font-bold text-white">${selectedCoin.ath?.toLocaleString() || 'N/A'}</p>
-                                </div>
+                        <div className="space-y-6">
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                <StatCard label="Price" value={`$${selectedCoin.current_price?.toLocaleString()}`} />
+                                <StatCard label="Market Cap" value={`$${selectedCoin.market_cap?.toLocaleString()}`} />
+                                <StatCard label="Volume" value={`$${selectedCoin.total_volume?.toLocaleString()}`} />
+                                <StatCard label="ATH" value={`$${selectedCoin.ath?.toLocaleString() || 'N/A'}`} />
                             </div>
 
-                            <div className="bg-gray-800/30 p-4 rounded-xl border border-gray-700/30 mb-8 h-[400px]">
+                            <div className="bg-gray-800/30 p-2 rounded-xl border border-gray-700/30 h-[250px] md:h-[400px] w-full">
                                 <Line data={lineChartData} options={chartOptions} />
                             </div>
 
-                            <div className="flex gap-4">
-                                <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition">
+                            <div className="flex gap-3">
+                                <button className="flex-1 flex items-center justify-center space-x-2 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg">
                                     <FaGlobe /> <span>Website</span>
                                 </button>
-                                <button className="flex items-center space-x-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition">
+                                <button className="flex-1 flex items-center justify-center space-x-2 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-lg">
                                     <FaTwitter /> <span>Community</span>
                                 </button>
                             </div>
-                        </>
+                        </div>
                     )}
                 </div>
             </div>
         </div>
     );
+
+    // ৩. React Portal ব্যবহার করে সরাসরি body ট্যাগে পাঠানো হচ্ছে
+    return ReactDOM.createPortal(modalContent, document.body);
 };
+
+const StatCard = ({ label, value }) => (
+    <div className="p-3 bg-gray-800/50 rounded-xl border border-gray-700/50">
+        <p className="text-gray-400 text-[10px] uppercase mb-1">{label}</p>
+        <p className="text-sm md:text-lg font-bold text-white truncate">{value}</p>
+    </div>
+);
 
 export default DetailsView;
