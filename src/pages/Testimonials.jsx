@@ -7,19 +7,19 @@ const Testimonials = () => {
             name: "Alex Morgan",
             role: "Crypto Trader",
             comment: "The real-time data updates on this platform have helped my trading immensely. The interface is clean and very user-friendly.",
-            avatar: "https://randomuser.me/api/portraits/men/32.jpg"
+            avatar: "/Testimonial img/img-1.jpg"
         },
         {
             name: "Sarah Jenkins",
             role: "Investor",
             comment: "I just started investing, and the guidelines along with the portfolio tracking system here are simply amazing.",
-            avatar: "https://randomuser.me/api/portraits/women/44.jpg"
+            avatar: "/Testimonial img/img-2.jpg"
         },
         {
             name: "Michael Chen",
             role: "Day Trader",
             comment: "With the CoinGecko API integration, the prices are always spot on. Definitely the best crypto dashboard I've used.",
-            avatar: "https://randomuser.me/api/portraits/men/85.jpg"
+            avatar: "/Testimonial img/img-3.jpg"
         }
     ];
 

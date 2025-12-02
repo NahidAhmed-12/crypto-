@@ -3,11 +3,10 @@ import { motion } from 'framer-motion';
 
 const Hero = () => {
   return (
-    // 1. Background changed to 'bg-slate-900' to differentiate from the next section
-    // 2. Added 'border-b border-slate-800' for a solid dividing line
+ 
     <section className="relative w-full pt-32 pb-24 lg:pt-40 lg:pb-32 overflow-hidden bg-slate-900 border-b border-slate-800">
       
-      {/* Background Subtle Gradient Overlay - Adds depth */}
+    
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-slate-900/50"></div>
       
       {/* Top Glow Spot */}
@@ -59,7 +58,7 @@ const Hero = () => {
               </button>
             </div>
 
-            {/* Stats Section - Updated Border Color */}
+           
             <div className="mt-20 pt-10 border-t border-slate-800 grid grid-cols-2 md:grid-cols-4 gap-8">
                 {[
                     { label: "Active Users", value: "50K+" },

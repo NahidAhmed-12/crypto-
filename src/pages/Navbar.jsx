@@ -9,7 +9,7 @@ const Navbar = () => {
   const toggleMenu = () => setIsOpen(!isOpen);
   const closeMenu = () => setIsOpen(false);
 
-  // মেনু আইটেম কনফিগারেশন (আইকন সহ)
+
   const menuItems = [
     { name: 'Home', icon: <FaHome />, link: '#' },
     { name: 'Market', icon: <FaChartLine />, link: '#' },
@@ -17,7 +17,6 @@ const Navbar = () => {
     { name: 'News', icon: <FaNewspaper />, link: '#' },
   ];
 
-  // 🔥 প্রিমিয়াম বাটন স্টাইল
   const walletBtnStyle = `
     relative group overflow-hidden 
     bg-gradient-to-r from-cyan-500 via-blue-600 to-blue-700 
@@ -59,7 +58,7 @@ const Navbar = () => {
           </ul>
         </div>
 
-        {/* 3. Right Side Actions */}
+       
         <div className="flex items-center space-x-3 md:order-2">
           {/* Desktop Wallet Button */}
           <div className="hidden md:block">
@@ -120,7 +119,7 @@ const Navbar = () => {
                   </button>
                 </div>
 
-                {/* Scrollable Links Section (Flex-1 takes available space) */}
+           
                 <div className="flex-1 overflow-y-auto p-5 space-y-2 relative z-10">
                   {menuItems.map((item, index) => (
                     <motion.div 
@@ -141,7 +140,7 @@ const Navbar = () => {
                   ))}
                 </div>
 
-                {/* Footer Section (Fixed at bottom) */}
+               
                 <div className="p-6 pb-8 border-t border-gray-800/50 bg-[#0b1120]/80 backdrop-blur-md relative z-10">
                   <button type="button" className={`${walletBtnStyle} w-full py-3.5 justify-center text-lg shadow-lg`}>
                     <FaWallet className="text-xl" />

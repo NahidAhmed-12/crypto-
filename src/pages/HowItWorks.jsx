@@ -43,7 +43,7 @@ const HowItWorks = () => {
                                 {step.icon}
                             </div>
                             
-                            {/* Text Styling Matches Features.jsx */}
+                        
                             <h3 className="text-xl font-bold text-white mb-3 group-hover:text-blue-400 transition-colors">{step.title}</h3>
                             <p className="text-gray-400 leading-relaxed">
                                 {step.desc}

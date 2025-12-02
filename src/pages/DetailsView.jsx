@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import ReactDOM from 'react-dom'; // ১. এটা ইম্পোর্ট করা হয়েছে
+import ReactDOM from 'react-dom'; 
 import { Line } from 'react-chartjs-2';
 import { FaTimes, FaGlobe, FaTwitter } from 'react-icons/fa';
 import {
@@ -90,19 +90,17 @@ const DetailsView = ({ coinId, allCoins = [], onClose }) => {
         interaction: { intersect: false, mode: 'index' },
     };
 
-    // ২. মেইন কন্টেন্ট আলাদা ভেরিয়েবল-এ রাখা হলো
+
     const modalContent = (
         <div className="fixed inset-0 z-[99999] flex items-end md:items-center justify-center sm:px-4 sm:py-6 animate-in fade-in duration-200">
             
-            {/* Backdrop: ক্লিক করলে বন্ধ হবে */}
+        
             <div 
                 className="absolute inset-0 bg-black/80 backdrop-blur-sm"
                 onClick={onClose}
             ></div>
 
-            {/* Modal Container */}
-            {/* FIX: 'mb-0' এবং 'rounded-b-none' দিয়ে নিচে আটকানো হয়েছে মোবাইলে, যাতে উপরে না উঠে যায় */}
-            {/* FIX: 'mt-20' বা 'max-h-[80vh]' ব্যবহার করা হয়েছে সেফটির জন্য */}
+          
             <div className="relative w-full max-w-5xl bg-[#0f172a] border-t border-x md:border border-gray-800 shadow-2xl flex flex-col 
                             rounded-t-2xl md:rounded-2xl overflow-hidden
                             h-[85vh] md:h-auto md:max-h-[90vh] 
@@ -154,7 +152,7 @@ const DetailsView = ({ coinId, allCoins = [], onClose }) => {
         </div>
     );
 
-    // ৩. React Portal ব্যবহার করে সরাসরি body ট্যাগে পাঠানো হচ্ছে
+   
     return ReactDOM.createPortal(modalContent, document.body);
 };
 
