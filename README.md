@@ -2,7 +2,7 @@
   <h1 style="margin-top: 10px;">CryptoVerse | Real-Time Crypto Tracker</h1>
 </div>
 
-![Project Screenshot](./public/readmeimg/crypto.avif)
+![Project Screenshot](./public/crypto.avif)
 
 <div align="center">
 
